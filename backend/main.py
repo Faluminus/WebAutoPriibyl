@@ -19,10 +19,11 @@ async def login(user_in: UserIn)-> BaseUser:
 async def get_part(part_id: Annotated[UUID, Path(min_length=36, max_length=36)]) -> Part:
     pass
 
-@app.post('/parts/filtered', status_code=status.HTTP_200_OK, response_model=list[Part])
+@app.post('/parts/filtered', status_code=status.HTTP_200_OK,
+          response_model=list[Part], response_model_exclude_none=True)
 async def get_multiple_parts(offset: Annotated[int, Query(regex="^[0-9]+$")],
                              limit: int,
-                             part_filter: Annotated[PartsFilter|None, Body()] = None
+                             part_filter: Annotated[PartsFilter|None, Body(embed=True)] = None
                              ) -> list[Part]:
     pass
 
