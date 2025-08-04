@@ -5,6 +5,27 @@ from uuid import UUID
 from numpy.typing import NDArray
 import numpy as np
 
+#VALIDATIONS
+class ParentReqCheck(BaseModel):
+    @model_validator(mode='after')
+    def check_if_parent_is_requested(self) -> Self | None:
+        if self.itself is None:
+            return None
+        if self.itself:
+            return self
+        else:
+            return None
+
+class PickGroup(BaseModel):
+    @model_validator(mode='after')
+    def pick_group(self) -> Self | None:
+        for name, value in self.model_dump().items():
+            if name == "itself":
+                continue
+            if value is not None:
+                return value
+        return None
+
 class Car(BaseModel):
     brand: str = Field(description="The name of the brand", max_length=50)
     model: str = Field(description="Model of the car", max_length=50)
@@ -45,7 +66,7 @@ class CarsFilter(BaseModel):
     pass
 
 #UNDERCARIAGE FILTERS
-class BrzdoveSystemy(BaseModel):
+class BrzdoveSystemy(PickGroup, ParentReqCheck, BaseModel):
     itself: bool | None = None
     brzdova_kapalina: bool | None = None
     brzdove_hadicky: bool | None = None
@@ -68,17 +89,7 @@ class BrzdoveSystemy(BaseModel):
     tlakovy_aukumulator_a_spinac: bool | None = None
     ukazatel_opotrebeni: bool | None = None
 
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
-
-
-class Rizeni(BaseModel):
+class Rizeni(PickGroup, ParentReqCheck, BaseModel):
     itself: bool | None = None
     hadice_trubka: bool | None = None
     hlavni_paka_rizeni: bool | None = None
@@ -99,17 +110,7 @@ class Rizeni(BaseModel):
     vyrovnavaci_nadrzka_oleje: bool | None = None
     zaveseni_rizeni: bool | None = None
 
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
-
-
-class PruzinyTlumice(BaseModel):
+class PruzinyTlumice(PickGroup, ParentReqCheck, BaseModel):
     itself: bool | None = None
     dily_podvozku: bool | None = None
     automaticke_vyrovnavani_vysky_vozidla: bool | None = None
@@ -122,16 +123,7 @@ class PruzinyTlumice(BaseModel):
     ukazatel_zatizeni_napravy: bool | None = None
     vzduchove_odpruzeni: bool | None = None
 
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
-
-class NabojALoziskoKola(BaseModel):
+class NabojALoziskoKola(PickGroup, ParentReqCheck, BaseModel):
     itself: bool | None = None
     naboj_kola: bool | None = None
     lozisko_kola: bool | None = None
@@ -139,118 +131,51 @@ class NabojALoziskoKola(BaseModel):
     tesnici_krouzek: bool | None = None
     ulozeni_pouzdra_loziska: bool | None = None
 
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
-
-
-class NapravniceAUlozeni(BaseModel):
+class NapravniceAUlozeni(PickGroup, ParentReqCheck, BaseModel):
     itself: bool | None = None
     silentblok_ulozeni_zadni_napravy: bool | None = None
     silentbloky_a_cepy_napravnice: bool | None = None
     silentbloky_nosniku_napravy: bool | None = None
 
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
-
-class PricneRamenoAVymeneCasti(BaseModel):
+class PricneRamenoAVymeneCasti(PickGroup, ParentReqCheck, BaseModel):
     itself: bool | None = None
     pricne_rameno: bool | None = None
     vymene_casti_pricneho_ramene: bool | None = None
 
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
+class StabilizatorNapravyAJehoDily(PickGroup, ParentReqCheck, BaseModel):
+    itself: bool | None = None
+    kosti_a_tycky_stabilizatoru: bool | None = None
+    tyc_stabilizatoru: bool | None = None
+    ulozeni_stabilizatoru: bool | None = None
+    zkrutna_tyc: bool | None = None
 
-
-class StabilizatorNapravyAJehoDily(BaseModel):
-    itself: bool = False
-    kosti_a_tycky_stabilizatoru: bool = False
-    tyc_stabilizatoru: bool = False
-    ulozeni_stabilizatoru: bool = False
-    zkrutna_tyc: bool = False
-
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
-
-
-class ZaveseniNapravy(BaseModel):
-    itself: bool = False
+class ZaveseniNapravy(PickGroup, ParentReqCheck, BaseModel):
+    itself: bool | None = None
     naboj_a_lozisko_kola: NabojALoziskoKola
     napravnice_a_ulozeni: NapravniceAUlozeni
-    pruzne_upevneni_a_loziska: bool = False
-    pricna_vzpera_a_vzpera_pricneho_zavesneho_ramena: bool = False
+    pruzne_upevneni_a_loziska: bool | None = None
+    pricna_vzpera_a_vzpera_pricneho_zavesneho_ramena: bool | None = None
     pricne_rameno_a_vymene_casti: PricneRamenoAVymeneCasti
-    rozsireni_rozchodu: bool = False
-    sada_ulozeni_a_zaveseni_kol: bool = False
+    rozsireni_rozchodu: bool | None = None
+    sada_ulozeni_a_zaveseni_kol: bool | None = None
     stabilizator_napravy_a_jeho_dily: StabilizatorNapravyAJehoDily
 
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
-
-class Podvozek(BaseModel):
-    itself: bool = False
+class Podvozek(PickGroup, ParentReqCheck, BaseModel):
+    itself: bool | None = None
     brzdove_systemy: BrzdoveSystemy
     rizeni: Rizeni
     pruziny_a_tlumice: PruzinyTlumice
     zaveseni_napravy: ZaveseniNapravy
-    @model_validator(mode='after')
-    def check_if_parent_is_requested(self) -> Self | None:
-        if self.itself is None:
-            return None
-        if self.itself:
-            return self
-        else:
-            return None
-
 
 #ENGINE FILTERS
 class Engine(BaseModel):
     engine: bool = False
 
-
-
-class PartsFilter(BaseModel):
+class PartsFilter(PickGroup, BaseModel):
     model_config = {"extra":"forbid"}
     car: Car
     undercarriage: Podvozek
     engine: Engine
-
-    @model_validator(mode='after')
-    def pick_group(self) -> Self | None:
-        for _, value in self.model_dump().items():
-            if value is not None:
-                return value
-
-
 
 class BaseUser(BaseModel):
     username: str

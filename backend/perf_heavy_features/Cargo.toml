@@ -1,0 +1,11 @@
+[package]
+name = "perf_heavy_features"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "perf_heavy_features"
+create-type = ["cdylib"]
+
+[dependencies]
+pyo3 = {version = "0.25.0", features = ["extension-module"]}
