@@ -1,15 +1,25 @@
 use pyo3::prelude::*;
 use std::cmp::min;
 
-// This can be implemented and added into autocomplete if performance improvement is needed.
-// THIS WILL AFFECT THE QUALITY OF AUTOCOMPLETE NEGATIVELY BUT SPEED IT UP
+
+
+// This will affect  the quality of autocomplete negatively if there is not enough data
 #[allow(dead_code)]
-fn prefix_filtering() -> Vec<String> {
-    return vec!["None".to_string()];
+fn prefix_filtering(query: &str, target: Vec<Vec<String>>) -> Vec<Vec<String>> {
+    let mut result: Vec<Vec<String>> = Vec::new();
+    for entry in target.iter() {
+        for token in entry.iter() {
+            let length: usize = min(query.len(), token.len());
+            if query[0..length] == token[0..length] {
+                result.push(entry.clone());
+                break;
+            }
+        }
+    }
+    return result;
 }
 
 fn damerau_levenshtein_distance(query: &str, target: &str) -> u16 {
-
     //String size
     let length: usize = min(query.len(), target.len());
 
@@ -32,6 +42,7 @@ fn damerau_levenshtein_distance(query: &str, target: &str) -> u16 {
             }
         }
     }
+
     //Returns the final distance
     return dp[length][length];
 }
@@ -44,16 +55,20 @@ fn search_autocomplete(
     max_distance: u16,
 ) -> Vec<String> {
     let mut match_vec: Vec<(String, u16)> = Vec::new();
-    for item in listings.iter() {
-        let item_distance: u16 = damerau_levenshtein_distance(&item, query);
+    for field in listings.iter() {
+
+        let item_distance: u16 = damerau_levenshtein_distance(query, field);
         if item_distance > max_distance {
             continue;
         }
-        if match_vec.len() == 0 {
-            match_vec.push((item.to_string(), item_distance));
+        if item_distance == query.len() as u16 {
             continue;
         }
-        println!("{:?}", match_vec);
+
+        if match_vec.len() == 0 {
+            match_vec.push((field.clone(), item_distance));
+            continue;
+        }
         let mut insert_index: usize = 0;
         let mut is_bigger: bool = false;
         for (i, (_, distance)) in match_vec.iter().enumerate() {
@@ -66,15 +81,16 @@ fn search_autocomplete(
             }
         }
         if insert_index == match_vec.len() - 1 && is_bigger {
-            match_vec.push((item.clone(), item_distance));
+            match_vec.push((field.clone(), item_distance));
         } else {
-            match_vec.insert(insert_index, (item.clone(), item_distance));
+            match_vec.insert(insert_index, (field.clone(), item_distance));
         }
     }
+
     if num_of_best_matches <= match_vec.len() as u16 {
         match_vec = match_vec[0..num_of_best_matches as usize].to_vec();
     }
-    println!("{:?}", match_vec);
+
     let mut final_vec: Vec<String> = Vec::new();
     for (item, _) in match_vec.iter() {
         final_vec.push(item.clone());
