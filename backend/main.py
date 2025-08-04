@@ -3,6 +3,7 @@ from typing import Annotated
 from variables import Part, UserIn, UserOut, BaseUser, PartsFilter, ListedCar
 from uuid import UUID
 
+
 app = FastAPI()
 
 @app.get("/")
