@@ -9,20 +9,22 @@ fn prefix_filtering() -> Vec<String> {
 }
 
 fn damerau_levenshtein_distance(query: &str, target: &str) -> u16 {
+
+    //String size
+    let length: usize = min(query.len(), target.len());
+
     //Created matrix
     let mut dp: Vec<Vec<u16>> = vec![vec![0; target.len() + 1]; query.len() + 1];
 
     //Initialized the matrix
-    for i in 0..query.len() + 1 {
+    for i in 0..length + 1 {
         dp[i][0] = i as u16;
-    }
-    for j in 0..target.len() + 1 {
-        dp[0][j] = j as u16;
+        dp[0][i] = i as u16;
     }
 
     //Table population using damerau levenshtein alg
-    for i in 1..query.len() + 1 {
-        for j in 1..target.len() + 1 {
+    for i in 1..length + 1 {
+        for j in 1..length + 1 {
             if query.as_bytes()[i - 1] == target.as_bytes()[j - 1] {
                 dp[i][j] = dp[i - 1][j - 1];
             } else {
@@ -31,7 +33,7 @@ fn damerau_levenshtein_distance(query: &str, target: &str) -> u16 {
         }
     }
     //Returns the final distance
-    return dp[query.len()][target.len()];
+    return dp[length][length];
 }
 
 #[pyfunction]
