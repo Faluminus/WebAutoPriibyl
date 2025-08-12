@@ -1,0 +1,4 @@
+email_validator==2.2.0
+fastapi[standart]==0.116.1
+maturin==1.9.2
+sqlmodel==0.0.24
