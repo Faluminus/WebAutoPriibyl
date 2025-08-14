@@ -1,22 +1,29 @@
-from sqlmodel import SQLModel, Field, create_engine
-from  ..variables import *
+import os
 
-POSTGRESQL_FILE_NAME = ""
-POSTGRE_URL = ""
+from sqlmodel import SQLModel, Field, create_engine, Session, select
+from  ..variables import PartDetail, CarDetail
+from dotenv import load_dotenv
 
-class PartFilter(SQLModel, table=True):
-    pass
+load_dotenv()
+USER = os.getenv("POSTGRES_USER")
+PASSWORD = os.getenv("POSTGRES_PASSWORD")
+DB = os.getenv("POSTGRES_DB")
+DATABASE_URL = f"postgresql://{USER}:{PASSWORD}@localhost:5432/{DB}"
+
+class PartFilters(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
 
 class CarFilter(SQLModel, table=True):
-    pass
+    id: int | None = Field(default=None, primary_key=True)
 
-class Car(SQLModel, table=True):
-    pass
+class Car(CarDetail, SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
 
-class Part(SQLModel, table=True):
-    pass
+class Part(PartDetail, SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
 
-engine = create_engine('mysql+mysqlconnector://root:root@localhost:3306/test')
+
+engine = create_engine(DATABASE_URL)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(bind=engine)
